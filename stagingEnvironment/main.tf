@@ -1,0 +1,3 @@
+module "StagingModule" {
+  source = "../ModuleEnfant"
+}
