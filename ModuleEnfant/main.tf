@@ -1,13 +1,13 @@
 resource "azurerm_resource_group" "webserver" {
-   name = "nginx-server-cedric-terraform"
-   location = "francecentral"
+   name = "nginx-server-cedric${var.environment}"
+   location = var.location
 }
 
 resource "azurerm_network_security_group" "allowedports" {
    name = "allowedports"
    resource_group_name = azurerm_resource_group.webserver.name
-   location = "francecentral"
-  
+   location = azurerm_resource_group.webserver.location
+
    security_rule {
        name = "http"
        priority = 100
@@ -20,19 +20,7 @@ resource "azurerm_network_security_group" "allowedports" {
        destination_address_prefix = "*"
    }
 
-   security_rule {
-       name = "https"
-       priority = 200
-       direction = "Inbound"
-       access = "Allow"
-       protocol = "Tcp"
-       source_port_range = "*"
-       destination_port_range = "443"
-       source_address_prefix = "*"
-       destination_address_prefix = "*"
-   }
-
-   security_rule {
+  security_rule {
        name = "ssh"
        priority = 300
        direction = "Inbound"
@@ -43,22 +31,18 @@ resource "azurerm_network_security_group" "allowedports" {
        source_address_prefix = "*"
        destination_address_prefix = "*"
    }
-}
+   security_rule {
+       name = "port8080"
+       priority = 400
+       direction = "Inbound"
+       access = "Allow"
+       protocol = "Tcp"
+       source_port_range = "*"
+       destination_port_range = "8080"
+       source_address_prefix = "*"
+       destination_address_prefix = "*"
+   }
 
-resource "azurerm_virtual_network" "webserver-net" {
-  name                = "webserver-net"
-  address_space       = ["10.0.0.0/16"]
-  location            = azurerm_resource_group.webserver.location
-  resource_group_name = azurerm_resource_group.webserver.name
-}
-
-resource "azurerm_subnet" "webserver-subnet" {
-  name                 = "subnet01"
-  resource_group_name  = azurerm_resource_group.webserver.name
-  virtual_network_name = azurerm_virtual_network.webserver-net.name
-  address_prefixes       = ["10.0.1.0/24"]
-
-  private_link_service_network_policies_enabled = false
 }
 
 resource "azurerm_subnet_network_security_group_association" "mgmt-nsg-association" {
@@ -69,12 +53,12 @@ resource "azurerm_subnet_network_security_group_association" "mgmt-nsg-associati
 
 resource "azurerm_public_ip" "webserver_public_ip" {
    name = "webserver_public_ip"
-   location = "francecentral"
+   location = var.location
    resource_group_name = azurerm_resource_group.webserver.name
    allocation_method = "Dynamic"
 
    tags = {
-       environment = "default"
+       environment = var.environment
        costcenter = "it"
    }
 
@@ -98,9 +82,10 @@ resource "azurerm_network_interface" "webserver" {
 
 resource "azurerm_linux_virtual_machine" "nginx" {
    size = var.instance_size
-   name = "nginx-webserver"
+   name = "nginx-webserver-cedric"
    resource_group_name = azurerm_resource_group.webserver.name
    location = azurerm_resource_group.webserver.location
+   custom_data = base64encode(file("../ModuleEnfant/init-script.sh"))
    network_interface_ids = [
        azurerm_network_interface.webserver.id,
    ]
@@ -114,7 +99,7 @@ resource "azurerm_linux_virtual_machine" "nginx" {
 
    computer_name = "nginx"
    admin_username = "adminuser"
-   admin_password = "Faizan@bashir.123"
+   admin_password = Azertyty123!"
    disable_password_authentication = false
 
    os_disk {
