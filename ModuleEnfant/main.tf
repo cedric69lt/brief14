@@ -1,5 +1,5 @@
 resource "azurerm_resource_group" "webserver" {
-   name = "nginx-server-cedric${var.environment}"
+   name = "vincent-nginx-server${var.environment}"
    location = var.location
 }
 
@@ -7,7 +7,7 @@ resource "azurerm_network_security_group" "allowedports" {
    name = "allowedports"
    resource_group_name = azurerm_resource_group.webserver.name
    location = azurerm_resource_group.webserver.location
-
+  
    security_rule {
        name = "http"
        priority = 100
@@ -19,8 +19,33 @@ resource "azurerm_network_security_group" "allowedports" {
        source_address_prefix = "*"
        destination_address_prefix = "*"
    }
+   
+   security_rule {
+       name = "http2"
+       priority = 110
+       direction = "Inbound"
+       access = "Allow"
+       protocol = "Tcp"
+       source_port_range = "*"
+       destination_port_range = "8080"
+       source_address_prefix = "*"
+       destination_address_prefix = "*"
+   }
 
-  security_rule {
+
+   security_rule {
+       name = "https"
+       priority = 200
+       direction = "Inbound"
+       access = "Allow"
+       protocol = "Tcp"
+       source_port_range = "*"
+       destination_port_range = "443"
+       source_address_prefix = "*"
+       destination_address_prefix = "*"
+   }
+
+   security_rule {
        name = "ssh"
        priority = 300
        direction = "Inbound"
@@ -31,25 +56,12 @@ resource "azurerm_network_security_group" "allowedports" {
        source_address_prefix = "*"
        destination_address_prefix = "*"
    }
-   security_rule {
-       name = "port8080"
-       priority = 400
-       direction = "Inbound"
-       access = "Allow"
-       protocol = "Tcp"
-       source_port_range = "*"
-       destination_port_range = "8080"
-       source_address_prefix = "*"
-       destination_address_prefix = "*"
-   }
-
 }
 
 resource "azurerm_subnet_network_security_group_association" "mgmt-nsg-association" {
-    subnet_id = azurerm_subnet.webserver-subnet.id
+    subnet_id                 = azurerm_subnet.webserver-subnet.id
     network_security_group_id = azurerm_network_security_group.allowedports.id
 }
-
 
 resource "azurerm_public_ip" "webserver_public_ip" {
    name = "webserver_public_ip"
@@ -82,14 +94,14 @@ resource "azurerm_network_interface" "webserver" {
 
 resource "azurerm_linux_virtual_machine" "nginx" {
    size = var.instance_size
-   name = "nginx-webserver-cedric"
+   name = "cedric-nginx-webserver${var.environment}"
    resource_group_name = azurerm_resource_group.webserver.name
    location = azurerm_resource_group.webserver.location
    custom_data = base64encode(file("../ModuleEnfant/init-script.sh"))
    network_interface_ids = [
        azurerm_network_interface.webserver.id,
    ]
-
+   
    source_image_reference {
        publisher = "Canonical"
        offer = "UbuntuServer"
@@ -98,8 +110,8 @@ resource "azurerm_linux_virtual_machine" "nginx" {
    }
 
    computer_name = "nginx"
-   admin_username = "adminuser"
-   admin_password = Azertyty123!"
+   admin_username = "azureusuer"
+   admin_password = "Azertyty123123"
    disable_password_authentication = false
 
    os_disk {
@@ -110,7 +122,7 @@ resource "azurerm_linux_virtual_machine" "nginx" {
    }
 
    tags = {
-       environment = "default"
+       environment = var.environment
        costcenter = "it"
    }
 
