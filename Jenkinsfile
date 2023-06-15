@@ -2,7 +2,7 @@ pipeline{
     agent any
     
     tools {
-        terraform 'terra'
+        terraform 'terraform'
     }
      stages{
         stage('GitTest'){
@@ -12,18 +12,44 @@ pipeline{
         }
         stage('Terraform init'){
             steps{
-                sh 'terraform init'
+                sh 'cd stagingEnvironment && terraform init'
             }
         }
         stage('Terraform plan'){
             steps{
-                sh 'terraform plan'
+                sh 'cd stagingEnvironment && terraform plan'
             }
         }
         stage('Terraform apply'){
             steps{
-                sh 'terraform apply -auto-approve'
+                sh 'cd stagingEnvironment && terraform apply -auto-approve'
             }
     }
+    
+    stage ('Docker Build') {
+            steps {
+                script {
+                    sh 'cd app && sudo docker build -t image-brief14 .'
+                    echo 'Build Image Completed'
+                }    
+            }
+        }
+
+
+        stage('Docker Login') {
+            steps {
+                script {
+                    sh 'sudo docker login -u cedric69 -p Azertyty123' 
+                }    
+            }
+        }
+
+        stage ('Docker Push') {
+            steps {
+                script {
+                    sh 'cd app && sudo docker push cedric69/image-brief14'        
+                }    
+            }
+        } 
 }
 }
