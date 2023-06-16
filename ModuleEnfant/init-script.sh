@@ -7,7 +7,7 @@ sudo sh get-docker.sh
 #sudo chown $USER /var/run/docker.sock
 
 #Creating container
-sudo docker run -d -p 80:1234 --name conteneurnginx cedric69/imagebrief14
+sudo docker run -d -p 1234:1234 --name conteneurnginx cedric69/imagebrief14
 
 
 #Installing Docker deuxieme méthode
