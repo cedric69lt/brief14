@@ -111,7 +111,7 @@ resource "azurerm_linux_virtual_machine" "nginx" {
 
    computer_name = "nginx"
    admin_username = "azureusuer"
-   admin_password = "Azertyty123123"
+   admin_password = "Azertyty123!"
    disable_password_authentication = false
 
    os_disk {
