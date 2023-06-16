@@ -1,5 +1,5 @@
 resource "azurerm_resource_group" "webserver" {
-   name = "vincent-nginx-server${var.environment}"
+   name = "cedric-nginx-server${var.environment}"
    location = var.location
 }
 
